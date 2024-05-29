@@ -1,5 +1,4 @@
 'use client'
-
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -30,8 +29,7 @@ const formSchema = z.object({
     .min(7, { message: 'Password must have at least 7 characters' })
     .max(12, { message: 'Password must be less than 12 characters' }),
 })
-
-export function CreateAccountForm() {
+export function LoginAccountForm() {
   const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,27 +45,17 @@ export function CreateAccountForm() {
       const { email, password } = values
       const {
         error,
-        data: { user },
-      } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${location.origin}/auth/callback`,
-        },
-      })
-
-      if (user) {
-        form.reset()
-        router.push('/')
-      }
+        data: { session },
+      } = await supabase.auth.signInWithPassword({ email, password })
+      form.reset()
+      router.refresh()
     } catch (error) {
-      console.log('CreateAccountForm', error)
+      console.log('LoginAccountForm', error)
     }
   }
-
   return (
     <div className="flex flex-col items-center justify-center space-y-2">
-      <span className="text-lg">You will love it.</span>
+      <span className="text-lg">Its good to see you here again.</span>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -101,7 +89,7 @@ export function CreateAccountForm() {
               </FormItem>
             )}
           />
-          <Button type="submit">Create Account</Button>
+          <Button type="submit">Login</Button>
         </form>
       </Form>
     </div>
